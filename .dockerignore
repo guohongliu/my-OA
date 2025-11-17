@@ -1,0 +1,7 @@
+.gradle/
+build/
+.git/
+**/*.iml
+*.log
+**/node_modules/
+HELP.md

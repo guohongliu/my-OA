@@ -7,6 +7,10 @@ public class Employee {
     private String email;
     private Long orgId;
     private String status;
+    private String gender;
+    private String position;
+    private String phone;
+    private String hireDate;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -20,5 +24,13 @@ public class Employee {
     public void setOrgId(Long orgId) { this.orgId = orgId; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getGender() { return gender; }
+    public void setGender(String gender) { this.gender = gender; }
+    public String getPosition() { return position; }
+    public void setPosition(String position) { this.position = position; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public String getHireDate() { return hireDate; }
+    public void setHireDate(String hireDate) { this.hireDate = hireDate; }
 }
 

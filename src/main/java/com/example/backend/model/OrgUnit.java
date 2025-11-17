@@ -10,6 +10,9 @@ public class OrgUnit {
     private Long parentId;
     private Integer level;
     private String status;
+    private String leaderName;
+    private String createdAt;
+    private String description;
     private List<OrgUnit> children = new ArrayList<>();
 
     public Long getId() { return id; }
@@ -24,6 +27,12 @@ public class OrgUnit {
     public void setLevel(Integer level) { this.level = level; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getLeaderName() { return leaderName; }
+    public void setLeaderName(String leaderName) { this.leaderName = leaderName; }
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
     public List<OrgUnit> getChildren() { return children; }
     public void setChildren(List<OrgUnit> children) { this.children = children; }
 }

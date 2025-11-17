@@ -15,13 +15,17 @@ java {
 }
 
 repositories {
-	mavenCentral()
+    maven { url = uri("https://repo.huaweicloud.com/repository/maven/") }
+    maven { url = uri("https://maven.aliyun.com/repository/public") }
+    mavenCentral()
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    runtimeOnly("org.postgresql:postgresql")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.withType<Test> {
