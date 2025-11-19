@@ -46,10 +46,11 @@ public class RefreshTokenService {
     @Transactional(readOnly = true)
     public String validate(String token) {
         String v = redis.opsForValue().get("rt:" + token);
-        if (v == null) return null;
+        if (v != null) return v;
         RefreshToken e = repo.findByToken(token).orElse(null);
-        if (e != null && e.isRevoked()) return null;
-        return v;
+        if (e == null || e.isRevoked()) return null;
+        if (Instant.now().isAfter(e.getExpiresAt())) return null;
+        return e.getUser().getUsername();
     }
 
     @Transactional
