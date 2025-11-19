@@ -7,5 +7,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 COPY --from=build /home/gradle/project/build/libs/*.jar app.jar
 EXPOSE 8080
-ENV JAVA_OPTS=""
+ENV JAVA_OPTS="" \
+    SPRING_DATA_REDIS_HOST=redis \
+    SPRING_DATA_REDIS_PORT=6379
 ENTRYPOINT ["sh","-c","java $JAVA_OPTS -jar /app/app.jar"]

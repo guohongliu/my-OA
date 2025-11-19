@@ -1,6 +1,6 @@
 package com.example.backend.controller;
 
-import com.example.backend.model.AuditLogEntry;
+import com.example.backend.domain.AuditLog;
 import com.example.backend.service.AuditService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +16,6 @@ public class AuditController {
     public AuditController(AuditService auditService) { this.auditService = auditService; }
 
     @GetMapping
-    public List<AuditLogEntry> list() { return auditService.list(); }
+    public List<AuditLog> list() { return auditService.list(); }
 }
 

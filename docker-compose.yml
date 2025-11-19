@@ -1,5 +1,12 @@
 version: "3.8"
 services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
   postgres:
     image: bitnami/postgresql:latest
     environment:
@@ -20,11 +27,16 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/oa
       SPRING_DATASOURCE_USERNAME: oa
       SPRING_DATASOURCE_PASSWORD: oa_pwd
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
     ports:
       - "8080:8080"
 volumes:
   pgdata:
+  redisdata:

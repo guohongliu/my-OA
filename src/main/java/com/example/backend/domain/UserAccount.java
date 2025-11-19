@@ -20,6 +20,11 @@ public class UserAccount {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @Column(nullable = false)
+    private int failedAttempts = 0;
+
+    private java.time.Instant lockedUntil;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -34,6 +39,10 @@ public class UserAccount {
     public void setPassword(String password) { this.password = password; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public int getFailedAttempts() { return failedAttempts; }
+    public void setFailedAttempts(int failedAttempts) { this.failedAttempts = failedAttempts; }
+    public java.time.Instant getLockedUntil() { return lockedUntil; }
+    public void setLockedUntil(java.time.Instant lockedUntil) { this.lockedUntil = lockedUntil; }
     public Set<Role> getRoles() { return roles; }
     public void setRoles(Set<Role> roles) { this.roles = roles; }
 }

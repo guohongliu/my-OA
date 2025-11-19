@@ -26,6 +26,7 @@ public class EmployeeController {
     public List<Employee> list() { return employeeService.list(); }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('EMPLOYEE_CREATE') or hasRole('ADMIN')")
     public ResponseEntity<Employee> create(@RequestBody Employee e, @RequestHeader(value = "X-Actor", required = false) String actor) {
         Employee created = employeeService.create(e);
         auditService.record(actor, "CREATE", "Employee", String.valueOf(created.getId()), created.getName());
@@ -40,6 +41,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('EMPLOYEE_UPDATE') or hasRole('ADMIN')")
     public ResponseEntity<Employee> update(@PathVariable Long id, @RequestBody Employee e, @RequestHeader(value = "X-Actor", required = false) String actor) {
         Employee updated = employeeService.update(id, e);
         if (updated == null) return ResponseEntity.notFound().build();
@@ -48,6 +50,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('EMPLOYEE_DELETE') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id, @RequestHeader(value = "X-Actor", required = false) String actor) {
         boolean ok = employeeService.delete(id);
         if (!ok) return ResponseEntity.notFound().build();

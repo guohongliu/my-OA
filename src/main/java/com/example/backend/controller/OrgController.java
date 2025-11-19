@@ -23,6 +23,7 @@ public class OrgController {
     public List<OrgUnit> list() { return orgService.list(); }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ORG_CREATE') or hasRole('ADMIN')")
     public ResponseEntity<OrgUnit> create(@RequestBody OrgUnit o, @RequestHeader(value = "X-Actor", required = false) String actor) {
         OrgUnit created = orgService.create(o);
         auditService.record(actor, "CREATE", "OrgUnit", String.valueOf(created.getId()), created.getName());
@@ -30,6 +31,7 @@ public class OrgController {
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ORG_UPDATE') or hasRole('ADMIN')")
     public ResponseEntity<OrgUnit> update(@PathVariable Long id, @RequestBody OrgUnit o, @RequestHeader(value = "X-Actor", required = false) String actor) {
         OrgUnit updated = orgService.update(id, o);
         if (updated == null) return ResponseEntity.notFound().build();
@@ -38,6 +40,7 @@ public class OrgController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAuthority('ORG_DELETE') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Long id, @RequestHeader(value = "X-Actor", required = false) String actor) {
         boolean ok = orgService.delete(id);
         if (!ok) return ResponseEntity.notFound().build();
