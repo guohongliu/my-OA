@@ -4,6 +4,7 @@ import com.example.backend.domain.RefreshToken;
 import com.example.backend.domain.UserAccount;
 import com.example.backend.repository.RefreshTokenRepository;
 import com.example.backend.repository.UserAccountRepository;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,11 +24,11 @@ public class RefreshTokenService {
     public RefreshTokenService(@Value("${security.jwt.refresh.exp-days}") int refreshExpDays,
                                RefreshTokenRepository repo,
                                UserAccountRepository userRepo,
-                               StringRedisTemplate redis) {
+                               ObjectProvider<StringRedisTemplate> redisProvider) {
         this.refreshExpDays = refreshExpDays;
         this.repo = repo;
         this.userRepo = userRepo;
-        this.redis = redis;
+        this.redis = redisProvider.getIfAvailable();
     }
 
     @Transactional
@@ -39,14 +40,18 @@ public class RefreshTokenService {
         rt.setExpiresAt(Instant.now().plus(refreshExpDays, ChronoUnit.DAYS));
         rt.setRevoked(false);
         repo.save(rt);
-        redis.opsForValue().set("rt:" + rt.getToken(), user.getUsername(), refreshExpDays, java.util.concurrent.TimeUnit.DAYS);
+        if (redis != null) {
+            redis.opsForValue().set("rt:" + rt.getToken(), user.getUsername(), refreshExpDays, java.util.concurrent.TimeUnit.DAYS);
+        }
         return rt.getToken();
     }
 
     @Transactional(readOnly = true)
     public String validate(String token) {
-        String v = redis.opsForValue().get("rt:" + token);
-        if (v != null) return v;
+        if (redis != null) {
+            String v = redis.opsForValue().get("rt:" + token);
+            if (v != null) return v;
+        }
         RefreshToken e = repo.findByToken(token).orElse(null);
         if (e == null || e.isRevoked()) return null;
         if (Instant.now().isAfter(e.getExpiresAt())) return null;
@@ -55,7 +60,7 @@ public class RefreshTokenService {
 
     @Transactional
     public void revoke(String token) {
-        redis.delete("rt:" + token);
+        if (redis != null) redis.delete("rt:" + token);
         repo.findByToken(token).ifPresent(e -> { e.setRevoked(true); repo.save(e); });
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,8 +25,9 @@ public class UserService implements UserDetailsService {
     private final UserAccountRepository userRepo;
     private final RoleRepository roleRepo;
     private final PermissionRepository permRepo;
+    private final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    public UserService(UserAccountRepository userRepo, RoleRepository roleRepo, PermissionRepository permRepo, PasswordEncoder encoder) {
+    public UserService(UserAccountRepository userRepo, RoleRepository roleRepo, PermissionRepository permRepo) {
         this.userRepo = userRepo;
         this.roleRepo = roleRepo;
         this.permRepo = permRepo;
@@ -34,20 +36,20 @@ public class UserService implements UserDetailsService {
         bootstrapUser("user", "user123", "ROLE_USER", encoder);
     }
 
+    @org.springframework.transaction.annotation.Transactional
     private void bootstrapUser(String username, String rawPassword, String roleName, PasswordEncoder encoder) {
         userRepo.findByUsername(username).ifPresentOrElse(u -> {}, () -> {
             Role role = roleRepo.findByName(roleName).orElseGet(() -> { Role r = new Role(); r.setName(roleName); return roleRepo.save(r); });
-            if (roleName.equals("ROLE_ADMIN")) {
-                ensurePerm(role, "EMPLOYEE_READ");
-                ensurePerm(role, "EMPLOYEE_CREATE");
-                ensurePerm(role, "EMPLOYEE_UPDATE");
-                ensurePerm(role, "EMPLOYEE_DELETE");
-                ensurePerm(role, "ORG_CREATE");
-                ensurePerm(role, "ORG_UPDATE");
-                ensurePerm(role, "ORG_DELETE");
-            } else {
-                ensurePerm(role, "EMPLOYEE_READ");
+            java.util.List<String> names = roleName.equals("ROLE_ADMIN")
+                    ? java.util.List.of("EMPLOYEE_READ","EMPLOYEE_CREATE","EMPLOYEE_UPDATE","EMPLOYEE_DELETE","ORG_CREATE","ORG_UPDATE","ORG_DELETE")
+                    : java.util.List.of("EMPLOYEE_READ");
+            for (String n : names) {
+                Permission p = permRepo.findByName(n).orElseGet(() -> { Permission x = new Permission(); x.setName(n); return permRepo.save(x); });
+                if (role.getPermissions().stream().noneMatch(pp -> pp.getName().equals(n))) {
+                    role.getPermissions().add(p);
+                }
             }
+            roleRepo.save(role);
             UserAccount ua = new UserAccount();
             ua.setUsername(username);
             ua.setPassword(encoder.encode(rawPassword));
@@ -59,8 +61,10 @@ public class UserService implements UserDetailsService {
 
     private void ensurePerm(Role role, String name) {
         Permission p = permRepo.findByName(name).orElseGet(() -> { Permission x = new Permission(); x.setName(name); return permRepo.save(x); });
-        role.getPermissions().add(p);
-        roleRepo.save(role);
+        if (role.getPermissions().stream().noneMatch(pp -> pp.getName().equals(name))) {
+            role.getPermissions().add(p);
+            roleRepo.save(role);
+        }
     }
 
     @Override

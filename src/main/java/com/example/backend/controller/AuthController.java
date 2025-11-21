@@ -61,6 +61,9 @@ public class AuthController {
             if (attempts >= maxFailed) {
                 uaEntity.setLockedUntil(now.plus(java.time.Duration.ofMinutes(lockMinutes)));
                 uaEntity.setFailedAttempts(0);
+                userRepo.save(uaEntity);
+                auditService.recordWithContext(username, "LOGIN_LOCKED", "Auth", username, null, request.getRemoteAddr(), request.getHeader("X-Device-Id"), request.getHeader("User-Agent"));
+                return ResponseEntity.status(423).build();
             }
             userRepo.save(uaEntity);
             auditService.recordWithContext(username, "LOGIN_FAILED", "Auth", username, null, request.getRemoteAddr(), request.getHeader("X-Device-Id"), request.getHeader("User-Agent"));

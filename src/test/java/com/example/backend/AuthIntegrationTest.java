@@ -19,7 +19,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
         "security.auth.max-failed=2",
-        "security.auth.lock-minutes=1"
+        "security.auth.lock-minutes=1",
+        "spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL",
+        "spring.datasource.driver-class-name=org.h2.Driver",
+        "spring.datasource.username=sa",
+        "spring.datasource.password=",
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "security.jwt.secret=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
 })
 class AuthIntegrationTest {
     @Autowired MockMvc mvc;
@@ -47,6 +54,7 @@ class AuthIntegrationTest {
         mvc.perform(post("/api/auth/refresh").contentType("application/json").content("{\"refreshToken\":\""+refresh+"\"}"))
                 .andExpect(status().isUnauthorized());
 
-        mvc.perform(get("/api/audit-logs")).andExpect(status().isOk());
+        String access = rt.get("accessToken").asText();
+        mvc.perform(get("/api/audit-logs").header("Authorization","Bearer "+access)).andExpect(status().isOk());
     }
 }
