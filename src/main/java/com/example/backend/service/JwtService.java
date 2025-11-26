@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,16 +30,24 @@ public class JwtService {
                 .claims(claims)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plus(accessExpMinutes, ChronoUnit.MINUTES)))
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                .signWith(Keys.hmacShaKeyFor(keyBytes()))
                 .compact();
     }
 
     public String validateAndGetSubject(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
+                .verifyWith(Keys.hmacShaKeyFor(keyBytes()))
                 .build()
                 .parseSignedClaims(token)
                 .getPayload()
                 .getSubject();
+    }
+
+    private byte[] keyBytes() {
+        try {
+            return Decoders.BASE64.decode(secret);
+        } catch (IllegalArgumentException e) {
+            return secret.getBytes(StandardCharsets.UTF_8);
+        }
     }
 }

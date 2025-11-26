@@ -1,7 +1,7 @@
 version: "3.8"
 services:
   redis:
-    image: redis:7-alpine
+    image: redis:latest
     command: redis-server --appendonly yes
     ports:
       - "6379:6379"
@@ -35,6 +35,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: oa_pwd
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
+      SECURITY_JWT_SECRET: CFism35XwyghTrz0uTycSyOfP3CVNS/DkUJtvNmTqsUvpGNQYnKrXT37xzlCvA3mDlxRL9DkkfHhAQni3cHw4A==
     ports:
       - "8080:8080"
 volumes:
